@@ -1,0 +1,9 @@
+services:
+  questdb:
+    build: .
+    ports:
+      - "18812:8812"
+      - "19000:9000"
+      - "19009:9009"
+    volumes:
+      - ./questdb-data:/var/lib/questdb
