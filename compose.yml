@@ -1,9 +1,9 @@
 services:
-  questdb:
-    build: .
-    ports:
-      - "18812:8812"
-      - "19000:9000"
-      - "19009:9009"
-    volumes:
-      - ./questdb-data:/var/lib/questdb
+    questdb:
+        build: .
+        ports:
+            - "${QUESTDB_PG_PORT}:8812"
+            - "${QUESTDB_HTTP_PORT}:9000"
+            - "${QUESTDB_INFLUX_PORT}:9009"
+        volumes:
+            - ./questdb-data:/var/lib/questdb

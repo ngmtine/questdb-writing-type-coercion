@@ -1,7 +1,7 @@
 import socket
-from typing import Any, Dict, List
+from typing import Any
 
-from src.repository.IQuestDBRepository import IQuestDBRepository
+from .IQuestDBRepository import IQuestDBRepository
 
 
 class QuestDBRepositoryInfluxImpl(IQuestDBRepository):
@@ -17,7 +17,7 @@ class QuestDBRepositoryInfluxImpl(IQuestDBRepository):
 
     def write(
         self,
-        data: List[Dict[str, Any]],
+        data: list[dict[str, Any]],
         table_name: str,
     ):
         """
@@ -29,10 +29,10 @@ class QuestDBRepositoryInfluxImpl(IQuestDBRepository):
             return
 
         # InfluxDB Line Protocol形式の文字列を生成
-        lines = []
+        lines: list[str] = []
         for item in data:
-            tags = []
-            fields = []
+            tags: list[str] = []
+            fields: list[str] = []
             timestamp = ""
             for key, value in item.items():
                 if key == "timestamp":
@@ -59,6 +59,6 @@ class QuestDBRepositoryInfluxImpl(IQuestDBRepository):
             sock.sendall(payload)
             sock.sendall(b"\n")  # InfluxDBでは最後に改行が必要
 
-    def read(self, query: str) -> List[Dict[str, Any]]:
+    def read(self, query: str) -> list[dict[str, Any]]:
         """InfluxDBラインプロトコルは書き込み専用のため、このメソッドはサポートしない"""
         raise NotImplementedError("Reading is not supported via InfluxDB line protocol.")

@@ -1,12 +1,13 @@
 [project]
-name = "questdb-test"
+name = "questdb-writing-type-coercion"
 version = "0.1.0"
 description = "questdbの書き込みテスト"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "psycopg2>=2.9.11",
-    "pydantic>=2.12.4",
+    "psycopg2-binary",
+    "requests",
+    "python-dotenv",
 ]
 
 [dependency-groups]
@@ -29,3 +30,6 @@ quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "auto"
+
+[tool.pyright]
+typeCheckingMode = "strict"

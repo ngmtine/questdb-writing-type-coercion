@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List
+from typing import Any
 
 
 class IQuestDBRepository(ABC):
@@ -8,7 +8,7 @@ class IQuestDBRepository(ABC):
     @abstractmethod
     def write(
         self,
-        data: List[Dict[str, Any]],
+        data: list[dict[str, Any]],
         table_name: str,
     ) -> None:
         """データを書き込む"""
@@ -18,6 +18,6 @@ class IQuestDBRepository(ABC):
     def read(
         self,
         query: str,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """データを読み込む"""
         raise NotImplementedError

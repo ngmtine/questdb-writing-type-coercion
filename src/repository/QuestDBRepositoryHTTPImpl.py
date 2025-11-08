@@ -1,9 +1,8 @@
-import json
-import urllib.parse
-import urllib.request
-from typing import Any, Dict, List
+from typing import Any
 
-from src.repository.IQuestDBRepository import IQuestDBRepository
+import requests
+
+from .IQuestDBRepository import IQuestDBRepository
 
 
 class QuestDBRepositoryHTTPImpl(IQuestDBRepository):
@@ -18,7 +17,7 @@ class QuestDBRepositoryHTTPImpl(IQuestDBRepository):
 
     def write(
         self,
-        data: List[Dict[str, Any]],
+        data: list[dict[str, Any]],
         table_name: str,
     ):
         """
@@ -30,15 +29,17 @@ class QuestDBRepositoryHTTPImpl(IQuestDBRepository):
             return
 
         # InfluxDB Line Protocol形式の文字列を生成
-        lines = []
+        lines: list[str] = []
         for item in data:
-            tags = []
-            fields = []
+            tags: list[str] = []
+            fields: list[str] = []
             timestamp = ""
             for key, value in item.items():
                 if key == "timestamp":
-                    timestamp = f" {int(value.timestamp() * 1e9)}"  # ナノ秒
+                    # timestampはナノ秒精度
+                    timestamp = f" {int(value.timestamp() * 1e9)}"
                 elif isinstance(value, str):
+                    # 文字列はダブルクォートで囲む
                     fields.append(f'{key}="{value}"')
                 elif isinstance(value, (int, float)):
                     fields.append(f"{key}={value}")
@@ -53,30 +54,32 @@ class QuestDBRepositoryHTTPImpl(IQuestDBRepository):
             line += f" {','.join(fields)}{timestamp}"
             lines.append(line)
 
-        payload = "\n".join(lines).encode("utf-8")
+        payload = "\n".join(lines)
 
-        req = urllib.request.Request(f"{self.base_url}/imp", data=payload, method="POST")
-        with urllib.request.urlopen(req) as res:
-            if res.status not in [200, 204]:
-                raise Exception(f"Failed to write data: {res.read().decode()}")
+        # /imp エンドポイントに multipart/form-data でPOSTリクエスト
+        # 'data'という名前のファイルとしてペイロードを送信
+        files = {"data": ("influx_payload.txt", payload, "text/plain")}
+
+        response = requests.post(f"{self.base_url}/imp", files=files)
+
+        # エラーがあれば例外を発生させる
+        response.raise_for_status()
 
     def read(
         self,
         query: str,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """データを読み込む"""
-        params = urllib.parse.urlencode({"query": query})
-        url = f"{self.base_url}/exp?{params}"
+        # /exp エンドポイントにGETリクエスト
+        response = requests.get(f"{self.base_url}/exp", params={"query": query})
+        response.raise_for_status()
 
-        req = urllib.request.Request(url)
-        with urllib.request.urlopen(req) as res:
-            response_body = res.read().decode("utf-8")
-            response_json = json.loads(response_body)
+        response_json = response.json()
 
-            columns = [col["name"] for col in response_json["columns"]]
-            dataset = response_json["dataset"]
+        columns = [col["name"] for col in response_json["columns"]]
+        dataset = response_json["dataset"]
 
-            result = []
-            for row in dataset:
-                result.append(dict(zip(columns, row)))
-            return result
+        result: list[dict[str, Any]] = []
+        for row in dataset:
+            result.append(dict(zip(columns, row)))
+        return result

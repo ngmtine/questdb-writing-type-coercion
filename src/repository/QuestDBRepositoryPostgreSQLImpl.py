@@ -1,8 +1,10 @@
-from typing import Any, Dict, List
+from datetime import datetime
+from typing import Any
 
 import psycopg2
 from psycopg2.extras import DictCursor
-from src.repository.IQuestDBRepository import IQuestDBRepository
+
+from .IQuestDBRepository import IQuestDBRepository
 
 
 class QuestDBRepositoryPostgreSQLImpl(IQuestDBRepository):
@@ -20,7 +22,7 @@ class QuestDBRepositoryPostgreSQLImpl(IQuestDBRepository):
 
     def write(
         self,
-        data: List[Dict[str, Any]],
+        data: list[dict[str, Any]],
         table_name: str,
     ):
         """
@@ -35,19 +37,18 @@ class QuestDBRepositoryPostgreSQLImpl(IQuestDBRepository):
 
         with psycopg2.connect(self.conn_str) as conn:
             with conn.cursor() as cursor:
-                # executemany を使って複数行を効率的に挿入
                 sql = f"INSERT INTO {table_name} ({', '.join(cols)}) VALUES ({', '.join(['%s'] * len(cols))})"
-                values = [[item[col] for col in cols] for item in data]
+                values = [[item[col].isoformat() if isinstance(item[col], datetime) else item[col] for col in cols] for item in data]
                 cursor.executemany(sql, values)
             conn.commit()
 
     def read(
         self,
         query: str,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """データを読み込む"""
         with psycopg2.connect(self.conn_str) as conn:
             with conn.cursor(cursor_factory=DictCursor) as cursor:
-                cursor.execute(query)
+                cursor.execute(query)  # pyright: ignore[reportUnknownMemberType]
                 results = cursor.fetchall()
                 return [dict(row) for row in results]
