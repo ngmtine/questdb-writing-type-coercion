@@ -1,0 +1,31 @@
+[project]
+name = "questdb-test"
+version = "0.1.0"
+description = "questdbの書き込みテスト"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "psycopg2>=2.9.11",
+    "pydantic>=2.12.4",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.14.4",
+    "ty>=0.0.1a25",
+]
+
+[tool.ruff]
+line-length = 200
+target-version = "py313"
+src = ["src"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = []
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
