@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 from src.repository.QuestDBRepositoryPostgreSQLImpl import QuestDBRepositoryPostgreSQLImpl
 
@@ -45,13 +45,13 @@ def main():
     # 書き込みデータの準備
     data_to_write = [
         {
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.now(timezone.utc),
             "device_id": "device_A",
             "temperature": 25.5,
             "humidity": 60.1,
         },
         {
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.now(timezone.utc),
             "device_id": "device_B",
             "temperature": 26.1,
             "humidity": 58.8,
